@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why I'm working on reward hacking research</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            
+            <h1>Why I'm working on reward hacking research</h1>
+            <p class="post-date">Published on June 8, 2025</p>
+
+            <blockquote class="quote-block">
+                <p>"Everything that can be automated will be automated"</p>
+                <footer>— Shoshana Zuboff, 1988</footer>
+            </blockquote>
+
+            <p>Anything that can be done on or using a computer, can be recorded, chunked, batched, and trained on. In the coming years, we will have increasingly more economically valuable tasks represented as virtual environments. Smarter models will be RL-trained on these virtual tasks. With increasingly complex tasks, accurately capturing intended outcomes becomes ever more challenging, and as a result, the gap between proxies and real-world objectives will likely widen.</p>
+            
+            <p>Reinforcement learning fundamentally depends on reward signals to drive behavior. This reliance opens up an important vulnerability, often called reward hacking. Reward hacking occurs when AI agents exploit discrepancies between intended goals and measured proxies, pursuing unintended shortcuts or harmful behaviors that still maximize numerical rewards. It can be thought of as pursuing the goal in ways that satisfies the letter but not the spirit of the objective. Most real-world tasks have poor-documentation and many important things are learned on the job. The complexity and subtlety of reward signals in increasingly sophisticated virtual environments will significantly amplify reward hacking risks. Future advanced AI systems may learn sophisticated strategies through RL that humans cannot understand well enough, or evaluate fast enough, to verify correctly.</p>
+
+            <p>Moreover, as models become more advanced, the impacts of reward hacking scale dramatically. Tasks such as financial modeling, cybersecurity operations, automated trading, or even decision-making in healthcare could become prime targets for reward hacking, with potentially disastrous outcomes if agents optimize rewards in ways misaligned with human intentions.</p>
+
+            <p>I recently finished developing a comprehensive characterization of reward hacking behaviors across frontier models (under review at NeurIPS) which I will open-source in the coming weeks.</p>
+
+            <p>I’m interested in the generalization behavior of models that learn to reward hack. Specifically, does RL training intrinsically encourage reward hacking behavior when encountering tasks out-of-distribution, and if so, why? My current investigations provide evidence towards this claim. How far does generalization extend from reward hacking behaviors learned during training to novel tasks? Is initial reward hacking necessary during training, or could models generalize reward hacking behaviors even when trained on ostensibly perfect reward signals?</p>
+
+            <p>All of these could be thought of as investigations under the question of how reinforcement learning fundamentally changes a model's behavioral tendencies. I think these are very important questions and I think it's worthwhile spending my time researching these.</p>
+            
+            <hr>
+            <p><a href="../index.html">&larr; Back to all takes</a></p>
+
+        </div>
+        
+        <footer class="contact-footer">
+            <div class="container">
+                <p>&copy; 2025 Kunvar Thaman (<a href="mailto:kunvar@mechinterp.com">email</a>, <a href="https://x.com/firstuserhere" target="_blank">Twitter/X</a>)</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

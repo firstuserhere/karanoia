@@ -2,12 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Read Aloud with OpenAI TTS</title>
+  <title>Listen – Read Aloud</title>
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; line-height: 1.5; }
     textarea { width: 100%; height: 200px; margin-bottom: 1rem; }
     select, input[type="text"] { margin-right: .5rem; }
     button { padding: .5rem 1rem; }
+    /* Modal styles */
+    #pwModal {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    #pwModalContent {
+      background: white; padding: 2rem; border-radius: 8px;
+      max-width: 90%; width: 300px; text-align: center;
+    }
+    #pwModal input { width: 100%; margin: .5rem 0; padding: .5rem; }
+    #pwModal button { margin: .5rem; }
   </style>
 </head>
 <body>
@@ -49,51 +62,89 @@
   </label>
   <br><br>
 
-  <label>Instructions: <input type="text" id="instr" placeholder="e.g. speak cheerfully"></label><br><br>
+  <label>Instructions: <input type="text" id="instr" placeholder="optional: e.g. speak cheerfully"></label><br><br>
 
   <button id="read">Read Aloud</button>
   <audio id="player" controls style="display:block; margin-top:1rem;"></audio>
 
+  <!-- Password Modal -->
+  <div id="pwModal">
+    <div id="pwModalContent">
+      <h2>Enter Password</h2>
+      <input type="password" id="pwInput" placeholder="Password to use default key">
+      <div>
+        <button id="pwSubmit">Submit</button>
+        <button id="pwSkip">Skip</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // 1. Ask for the API key once on load
-    const apiKey = prompt("Enter your OpenAI API key:");
+    // === CONFIGURE THESE ===
+    const PROTECTED_PASSWORD = "your-shared-password";       // share this with your GF/brother
+    const DEFAULT_OPENAI_KEY = "sk-YOUR_DEFAULT_KEY_HERE";  // your personal key
+    // =======================
 
-    document.getElementById("read").addEventListener("click", async () => {
-      const text = document.getElementById("text").value;
+    // On load, show modal
+    const modal = document.getElementById("pwModal");
+    const apiKeyKey = "READALOUD_APIKEY";
+
+    // Check if session already has a key
+    if (sessionStorage.getItem(apiKeyKey)) {
+      modal.style.display = "none";
+    }
+
+    document.getElementById("pwSubmit").onclick = () => {
+      const val = document.getElementById("pwInput").value;
+      if (val === PROTECTED_PASSWORD) {
+        sessionStorage.setItem(apiKeyKey, DEFAULT_OPENAI_KEY);
+        modal.style.display = "none";
+      } else {
+        alert("Incorrect password.");
+      }
+    };
+    document.getElementById("pwSkip").onclick = () => {
+      modal.style.display = "none";
+    };
+
+    document.getElementById("read").onclick = async () => {
+      let apiKey = sessionStorage.getItem(apiKeyKey);
+      if (!apiKey) {
+        apiKey = prompt("Enter your OpenAI API key:");
+        if (!apiKey) return alert("API key required to proceed.");
+        sessionStorage.setItem(apiKeyKey, apiKey);
+      }
+
+      const text = document.getElementById("text").value.trim();
       if (!text) return alert("Please paste some text first!");
-      const model = document.getElementById("model").value;
-      const voice = document.getElementById("voice").value;
-      const response_format = document.getElementById("format").value;
-      const instructions = document.getElementById("instr").value.trim();
 
-      // 2. Call the TTS endpoint
+      const payload = {
+        model: document.getElementById("model").value,
+        voice: document.getElementById("voice").value,
+        input: text,
+        response_format: document.getElementById("format").value
+      };
+      const instr = document.getElementById("instr").value.trim();
+      if (instr) payload.instructions = instr;
+
       const res = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
-        body: JSON.stringify({
-          model,
-          voice,
-          input: text,
-          instructions: instructions || undefined,
-          response_format
-        })
+        body: JSON.stringify(payload)
       });
-
       if (!res.ok) {
         const err = await res.json().catch(()=>null);
         return alert("TTS error: " + (err?.error?.message || res.statusText));
       }
-
-      // 3. Turn into blob and play
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const player = document.getElementById("player");
       player.src = url;
       player.play();
-    });
+    };
   </script>
 </body>
 </html>

@@ -51,7 +51,7 @@
   </label>
   <br>
 
-  <label>Instructions(Optional):<br>
+  <label>Instructions:<br>
     <input type="text" id="instr" placeholder="e.g. speak cheerfully" style="width:100%;">
   </label>
   <br>
@@ -152,7 +152,7 @@
 
         genStatus.textContent = "🎉 Audio is playing!";
       } catch (e) {
-        alert("TTS error: " + e.message);
+        alert("TTS	error: " + e.message);
         genStatus.textContent = "❌ Failed to generate audio.";
       } finally {
         btn.disabled = false;

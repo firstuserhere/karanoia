@@ -2,198 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Read Aloud (Chunked) with OpenAI TTS</title>
+  <title>Read Aloud with OpenAI TTS</title>
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
     textarea { width: 100%; height: 200px; margin-bottom: 1rem; }
-    select, input, button { margin: .5rem 0; width:100%; }
-    #genStatus, #accessStatus { font-style: italic; margin: .5rem 0; }
-    #access-section, #tts-section { padding: 1rem; border: 1px solid #ddd; margin-bottom: 1rem; }
+    select, input[type="text"], input[type="password"], button { margin: .5rem 0; }
+    #key-section { background: #f9f9f9; padding: 1rem; border: 1px solid #ddd; margin-bottom: 1rem; }
+    #genStatus { font-style: italic; margin: .5rem 0; }
   </style>
 </head>
 <body>
   <h1>Read Aloud</h1>
 
-  <!-- ACCESS -->
-  <div id="access-section">
-    <label>Password (friends & family):
-      <input type="password" id="accessPwd" placeholder="Enter shared password"></label>
-    <label>Your OpenAI API Key:
-      <input type="password" id="userKey" placeholder="sk-…your key…"></label>
-    <button id="unlockBtn">Continue</button>
-    <p id="accessStatus"></p>
+  <!-- API-key section -->
+  <div id="key-section">
+    <label for="apiKey">OpenAI API Key:</label><br>
+    <input type="password" id="apiKey" placeholder="sk-…your key…" style="width:100%;"><br>
+    <button id="saveKey">Save Key</button>
+    <button id="clearKey" style="float:right;color:#a00;">Clear Key</button>
+    <p id="status" style="font-size:.9em;color:green;"></p>
   </div>
 
   <!-- TTS controls -->
-  <div id="tts-section" style="display:none;">
-    <textarea id="text" placeholder="Paste your text here…"></textarea>
+  <textarea id="text" placeholder="Paste your text here…"></textarea><br>
 
-    <label>Model:
-      <select id="model">
-        <option value="gpt-4o-mini-tts">gpt-4o-mini-tts</option>
-        <option value="tts-1">tts-1</option>
-        <option value="tts-1-hd">tts-1-hd</option>
-      </select>
-    </label>
+  <label>Model:
+    <select id="model">
+      <option value="gpt-4o-mini-tts">gpt-4o-mini-tts</option>
+      <option value="tts-1">tts-1</option>
+      <option value="tts-1-hd">tts-1-hd</option>
+    </select>
+  </label>
 
-    <label>Voice:
-      <select id="voice">
-        <option>alloy</option><option>ash</option><option>ballad</option><option>coral</option>
-        <option>echo</option><option>fable</option><option>nova</option>
-        <option>onyx</option><option>sage</option><option>shimmer</option>
-      </select>
-    </label>
+  <label>Voice:
+    <select id="voice">
+      <option>alloy</option><option>ash</option><option>ballad</option><option>coral</option>
+      <option>echo</option><option>fable</option><option>nova</option>
+      <option>onyx</option><option>sage</option><option>shimmer</option>
+    </select>
+  </label>
 
-    <label>Format:
-      <select id="format">
-        <option value="mp3">mp3</option><option value="wav">wav</option>
-        <option value="opus">opus</option><option value="aac">aac</option>
-        <option value="flac">flac</option><option value="pcm">pcm</option>
-      </select>
-    </label>
+  <label>Format:
+    <select id="format">
+      <option value="mp3">mp3</option><option value="wav">wav</option>
+      <option value="opus">opus</option><option value="aac">aac</option>
+      <option value="flac">flac</option><option value="pcm">pcm</option>
+    </select>
+  </label>
+  <br>
 
-    <label>Instructions:
-      <input type="text" id="instr" placeholder="e.g. speak cheerfully"></label>
+  <label>Instructions:<br>
+    <input type="text" id="instr" placeholder="e.g. speak cheerfully" style="width:100%;">
+  </label>
+  <br>
 
-    <button id="read">Generate Audio</button>
-    <p id="genStatus"></p>
+  <button id="read">Generate Audio</button>
+  <p id="genStatus"></p>
 
-    <div id="playback-controls" style="display:none;">
-      <label>Speed:
-        <select id="speed">
-          <option value="0.5">0.5×</option>
-          <option value="0.75">0.75×</option>
-          <option value="1" selected>1×</option>
-          <option value="1.25">1.25×</option>
-          <option value="1.5">1.5×</option>
-          <option value="2">2×</option>
-        </select>
-      </label>
-    </div>
-
-    <audio id="player" controls style="display:none; width:100%;"></audio>
+  <!-- Playback controls -->
+  <div id="playback-controls" style="display:none; margin-top:1rem;">
+    <label for="speed">Speed:</label>
+    <select id="speed">
+      <option value="0.5">0.5×</option>
+      <option value="0.75">0.75×</option>
+      <option value="1" selected>1×</option>
+      <option value="1.25">1.25×</option>
+      <option value="1.5">1.5×</option>
+      <option value="2">2×</option>
+    </select>
   </div>
 
+  <audio id="player" controls style="display:none; width:100%; margin-top:1rem;"></audio>
+
   <script>
-    // Utility to split text into chunks under ~4000 chars (~2000 tokens)
-    function splitText(text) {
-      const paras = text.split(/\n{2,}/g);
-      const chunks = [];
-      const maxChars = 4000;
-      paras.forEach(p => {
-        if (p.length <= maxChars) {
-          chunks.push(p);
-        } else {
-          // split long paragraph into sentences
-          const sents = p.match(/[^.!?]+[.!?]*/g) || [p];
-          let buf = "";
-          sents.forEach(s => {
-            if ((buf + s).length > maxChars) {
-              chunks.push(buf);
-              buf = s;
-            } else {
-              buf += s;
-            }
-          });
-          if (buf) chunks.push(buf);
-        }
-      });
-      return chunks.filter(c => c.trim());
+    // Helpers to manage the key
+    const keyInput = document.getElementById("apiKey");
+    const status   = document.getElementById("status");
+    function loadKey() {
+      const k = localStorage.getItem("OPENAI_API_KEY");
+      if (k) { keyInput.value = k; status.textContent = "✔️ Key loaded"; }
     }
+    function saveKey() {
+      const v = keyInput.value.trim();
+      if (!v) return alert("Enter your key first!");
+      localStorage.setItem("OPENAI_API_KEY", v);
+      status.textContent = "🔒 Key saved";
+    }
+    function clearKey() {
+      localStorage.removeItem("OPENAI_API_KEY");
+      keyInput.value = "";
+      status.textContent = "🔓 Key cleared";
+    }
+    document.getElementById("saveKey").onclick  = saveKey;
+    document.getElementById("clearKey").onclick = clearKey;
+    loadKey();
 
-    // Auth logic
-    document.getElementById('unlockBtn').onclick = async () => {
-      const pwd = document.getElementById('accessPwd').value;
-      const userKey = document.getElementById('userKey').value.trim();
-      const status = document.getElementById('accessStatus');
-      status.textContent = 'Verifying…';
+    document.getElementById("read").onclick = async () => {
+      const btn = document.getElementById("read");
+      const genStatus = document.getElementById("genStatus");
+      const player = document.getElementById("player");
+      const playbackControls = document.getElementById("playback-controls");
+      const speedSelect = document.getElementById("speed");
+
+      const apiKey = localStorage.getItem("OPENAI_API_KEY");
+      if (!apiKey) return alert("Save your API key first!");
+      const text = document.getElementById("text").value;
+      if (!text) return alert("Paste some text first!");
+
+      const model           = document.getElementById("model").value;
+      const voice           = document.getElementById("voice").value;
+      const response_format = document.getElementById("format").value;
+      const instructions    = document.getElementById("instr").value.trim();
+
+      // UI feedback
+      btn.disabled = true;
+      btn.textContent = "Generating audio...";
+      genStatus.textContent = "Please wait, generating audio…";
+      player.style.display = 'none';
+      playbackControls.style.display = 'none';
+      player.src = '';
+
       try {
-        const res = await fetch('/api/auth', {
-          method: 'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ password: pwd||undefined, key: userKey||undefined })
+        const res = await fetch("https://api.openai.com/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ model, voice, input: text, instructions: instructions||undefined, response_format })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        sessionStorage.setItem('TTS_TOKEN', data.token);
-        document.getElementById('access-section').style.display='none';
-        document.getElementById('tts-section').style.display='block';
-      } catch(e) {
-        document.getElementById('accessStatus').style.color='red';
-        document.getElementById('accessStatus').textContent = '❌ ' + e.message;
-      }
-    };
-
-    // TTS generation + playback
-    document.getElementById('read').onclick = async () => {
-      const btn = document.getElementById('read');
-      const genStatus = document.getElementById('genStatus');
-      const player = document.getElementById('player');
-      const pc = document.getElementById('playback-controls');
-      const speedSel = document.getElementById('speed');
-
-      const token = sessionStorage.getItem('TTS_TOKEN');
-      if (!token) return alert('Not authenticated');
-      const text = document.getElementById('text').value;
-      if (!text) return alert('Paste text first!');
-
-      const payloadBase = {
-        model: document.getElementById('model').value,
-        voice: document.getElementById('voice').value,
-        instructions: document.getElementById('instr').value.trim()||undefined,
-        response_format: document.getElementById('format').value
-      };
-
-      // Split into manageable chunks
-      const segments = splitText(text);
-      const urls = [];
-
-      // Disable UI
-      btn.disabled = true; btn.textContent='Generating…';
-      genStatus.textContent = `Chunks: ${segments.length}. Starting…`;
-      player.style.display='none'; pc.style.display='none';
-
-      try {
-        for (let i = 0; i < segments.length; i++) {
-          genStatus.textContent = `Generating chunk ${i+1}/${segments.length}…`;
-          const res = await fetch('/api/tts', {
-            method:'POST',
-            headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-            body: JSON.stringify({ ...payloadBase, input: segments[i] })
-          });
-          if (!res.ok) {
-            const err = await res.json().catch(()=>{});
-            throw new Error(err?.error||res.statusText);
-          }
-          const blob = await res.blob();
-          urls.push(URL.createObjectURL(blob));
+        if (!res.ok) {
+          const err = await res.json().catch(()=>null);
+          throw new Error(err?.error?.message || res.statusText);
         }
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        player.src = url;
+        player.style.display = 'block';
+        playbackControls.style.display = 'block';
 
-        genStatus.textContent = 'All chunks ready. Playing…';
-        player.style.display='block'; pc.style.display='block';
-        let idx = 0;
-        // play sequentially
-        player.src = urls[idx];
-        player.playbackRate = parseFloat(speedSel.value);
-        player.play();
-        player.onended = () => {
-          idx++;
-          if (idx < urls.length) {
-            genStatus.textContent = `Playing chunk ${idx+1}/${urls.length}…`;
-            player.src = urls[idx];
-            player.play();
-          } else {
-            genStatus.textContent = '✅ Done!';
-            btn.disabled = false;
-            btn.textContent = 'Generate Audio';
-            player.onended = null;
-          }
+        // adjust speed mid-playback
+        speedSelect.onchange = () => {
+          player.playbackRate = parseFloat(speedSelect.value);
         };
 
-      } catch(e) {
-        alert('TTS error: '+ e.message);
-        genStatus.textContent = '❌ Failed.';
+        // start playing
+        player.playbackRate = parseFloat(speedSelect.value);
+        await player.play();
+
+        genStatus.textContent = "🎉 Audio is playing!";
+      } catch (e) {
+        alert("TTS	error: " + e.message);
+        genStatus.textContent = "❌ Failed to generate audio.";
+      } finally {
         btn.disabled = false;
-        btn.textContent = 'Generate Audio';
+        btn.textContent = "Generate Audio";
       }
     };
   </script>

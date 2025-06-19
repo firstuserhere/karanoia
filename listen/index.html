@@ -8,6 +8,7 @@
     textarea { width: 100%; height: 200px; margin-bottom: 1rem; }
     select, input[type="text"], input[type="password"], button { margin: .5rem 0; }
     #key-section { background: #f9f9f9; padding: 1rem; border: 1px solid #ddd; margin-bottom: 1rem; }
+    #genStatus { font-style: italic; margin: .5rem 0; }
   </style>
 </head>
 <body>
@@ -55,8 +56,9 @@
   </label>
   <br>
 
-  <button id="read">Read Aloud</button>
-  <audio id="player" controls style="display:block; margin-top:1rem;"></audio>
+  <button id="read">Generate Audio</button>
+  <p id="genStatus"></p>
+  <audio id="player" controls style="display:none; margin-top:1rem;"></audio>
 
   <script>
     // Helpers to manage the key
@@ -79,40 +81,56 @@
     }
     document.getElementById("saveKey").onclick  = saveKey;
     document.getElementById("clearKey").onclick = clearKey;
-
     loadKey();
 
     document.getElementById("read").onclick = async () => {
+      const btn = document.getElementById("read");
+      const genStatus = document.getElementById("genStatus");
+      const player = document.getElementById("player");
+
       const apiKey = localStorage.getItem("OPENAI_API_KEY");
       if (!apiKey) return alert("Save your API key first!");
       const text = document.getElementById("text").value;
       if (!text) return alert("Paste some text first!");
+
       const model           = document.getElementById("model").value;
       const voice           = document.getElementById("voice").value;
       const response_format = document.getElementById("format").value;
       const instructions    = document.getElementById("instr").value.trim();
 
-      // Call the API
-      const res = await fetch("https://api.openai.com/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ model, voice, input: text, instructions: instructions||undefined, response_format })
-      });
+      // UI feedback
+      btn.disabled = true;
+      btn.textContent = "Generating audio...";
+      genStatus.textContent = "Please wait, generating audio…";
+      player.style.display = 'none';
+      player.src = '';
 
-      if (!res.ok) {
-        const err = await res.json().catch(()=>null);
-        return alert("TTS error: " + (err?.error?.message || res.statusText));
+      try {
+        const res = await fetch("https://api.openai.com/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ model, voice, input: text, instructions: instructions||undefined, response_format })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(()=>null);
+          throw new Error(err?.error?.message || res.statusText);
+        }
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        player.src = url;
+        player.style.display = 'block';
+        await player.play();
+        genStatus.textContent = "🎉 Audio is playing!";
+      } catch (e) {
+        alert("TTS error: " + e.message);
+        genStatus.textContent = "❌ Failed to generate audio.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Generate Audio";
       }
-
-      // Play it
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const player = document.getElementById("player");
-      player.src = url;
-      player.play();
     };
   </script>
 </body>

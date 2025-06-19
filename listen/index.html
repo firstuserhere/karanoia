@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Read Aloud with OpenAI TTS</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; line-height: 1.5; }
+    textarea { width: 100%; height: 200px; margin-bottom: 1rem; }
+    select, input[type="text"] { margin-right: .5rem; }
+    button { padding: .5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Read Aloud</h1>
+  <textarea id="text" placeholder="Paste your text here…"></textarea><br>
+
+  <label>Model:
+    <select id="model">
+      <option value="gpt-4o-mini-tts">gpt-4o-mini-tts</option>
+      <option value="tts-1">tts-1</option>
+      <option value="tts-1-hd">tts-1-hd</option>
+    </select>
+  </label>
+
+  <label>Voice:
+    <select id="voice">
+      <option>alloy</option>
+      <option>ash</option>
+      <option>ballad</option>
+      <option>coral</option>
+      <option>echo</option>
+      <option>fable</option>
+      <option>nova</option>
+      <option>onyx</option>
+      <option>sage</option>
+      <option>shimmer</option>
+    </select>
+  </label>
+
+  <label>Format:
+    <select id="format">
+      <option value="mp3">mp3</option>
+      <option value="wav">wav</option>
+      <option value="opus">opus</option>
+      <option value="aac">aac</option>
+      <option value="flac">flac</option>
+      <option value="pcm">pcm</option>
+    </select>
+  </label>
+  <br><br>
+
+  <label>Instructions: <input type="text" id="instr" placeholder="e.g. speak cheerfully"></label><br><br>
+
+  <button id="read">Read Aloud</button>
+  <audio id="player" controls style="display:block; margin-top:1rem;"></audio>
+
+  <script>
+    // 1. Ask for the API key once on load
+    const apiKey = prompt("Enter your OpenAI API key:");
+
+    document.getElementById("read").addEventListener("click", async () => {
+      const text = document.getElementById("text").value;
+      if (!text) return alert("Please paste some text first!");
+      const model = document.getElementById("model").value;
+      const voice = document.getElementById("voice").value;
+      const response_format = document.getElementById("format").value;
+      const instructions = document.getElementById("instr").value.trim();
+
+      // 2. Call the TTS endpoint
+      const res = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          voice,
+          input: text,
+          instructions: instructions || undefined,
+          response_format
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(()=>null);
+        return alert("TTS error: " + (err?.error?.message || res.statusText));
+      }
+
+      // 3. Turn into blob and play
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const player = document.getElementById("player");
+      player.src = url;
+      player.play();
+    });
+  </script>
+</body>
+</html>

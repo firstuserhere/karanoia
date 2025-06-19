@@ -58,7 +58,21 @@
 
   <button id="read">Generate Audio</button>
   <p id="genStatus"></p>
-  <audio id="player" controls style="display:none; margin-top:1rem;"></audio>
+
+  <!-- Playback controls -->
+  <div id="playback-controls" style="display:none; margin-top:1rem;">
+    <label for="speed">Speed:</label>
+    <select id="speed">
+      <option value="0.5">0.5×</option>
+      <option value="0.75">0.75×</option>
+      <option value="1" selected>1×</option>
+      <option value="1.25">1.25×</option>
+      <option value="1.5">1.5×</option>
+      <option value="2">2×</option>
+    </select>
+  </div>
+
+  <audio id="player" controls style="display:none; width:100%; margin-top:1rem;"></audio>
 
   <script>
     // Helpers to manage the key
@@ -87,6 +101,8 @@
       const btn = document.getElementById("read");
       const genStatus = document.getElementById("genStatus");
       const player = document.getElementById("player");
+      const playbackControls = document.getElementById("playback-controls");
+      const speedSelect = document.getElementById("speed");
 
       const apiKey = localStorage.getItem("OPENAI_API_KEY");
       if (!apiKey) return alert("Save your API key first!");
@@ -103,6 +119,7 @@
       btn.textContent = "Generating audio...";
       genStatus.textContent = "Please wait, generating audio…";
       player.style.display = 'none';
+      playbackControls.style.display = 'none';
       player.src = '';
 
       try {
@@ -122,7 +139,17 @@
         const url  = URL.createObjectURL(blob);
         player.src = url;
         player.style.display = 'block';
+        playbackControls.style.display = 'block';
+
+        // adjust speed mid-playback
+        speedSelect.onchange = () => {
+          player.playbackRate = parseFloat(speedSelect.value);
+        };
+
+        // start playing
+        player.playbackRate = parseFloat(speedSelect.value);
         await player.play();
+
         genStatus.textContent = "🎉 Audio is playing!";
       } catch (e) {
         alert("TTS error: " + e.message);

@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Read Aloud with OpenAI TTS</title>
+  <title>Read Aloud with OpenAI TTS (Chunk Support)</title>
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
     textarea { width: 100%; height: 200px; margin-bottom: 1rem; }
-    select, input[type="text"], input[type="password"], button { margin: .5rem 0; }
-    #key-section { background: #f9f9f9; padding: 1rem; border: 1px solid #ddd; margin-bottom: 1rem; }
+    select, input[type="text"], input[type="password"], button { margin: .5rem 0; width:100%; }
     #genStatus { font-style: italic; margin: .5rem 0; }
+    #playback-controls { margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -16,15 +16,15 @@
 
   <!-- API-key section -->
   <div id="key-section">
-    <label for="apiKey">OpenAI API Key:</label><br>
-    <input type="password" id="apiKey" placeholder="sk-…your key…" style="width:100%;"><br>
+    <label for="apiKey">OpenAI API Key:</label>
+    <input type="password" id="apiKey" placeholder="sk-…your key…">
     <button id="saveKey">Save Key</button>
-    <button id="clearKey" style="float:right;color:#a00;">Clear Key</button>
+    <button id="clearKey" style="color:#a00;">Clear Key</button>
     <p id="status" style="font-size:.9em;color:green;"></p>
   </div>
 
   <!-- TTS controls -->
-  <textarea id="text" placeholder="Paste your text here…"></textarea><br>
+  <textarea id="text" placeholder="Paste your text here…"></textarea>
 
   <label>Model:
     <select id="model">
@@ -49,33 +49,52 @@
       <option value="flac">flac</option><option value="pcm">pcm</option>
     </select>
   </label>
-  <br>
 
-  <label>Instructions:<br>
-    <input type="text" id="instr" placeholder="e.g. speak cheerfully" style="width:100%;">
-  </label>
-  <br>
+  <label>Instructions:
+    <input type="text" id="instr" placeholder="e.g. speak cheerfully"></label>
 
   <button id="read">Generate Audio</button>
   <p id="genStatus"></p>
 
-  <!-- Playback controls -->
-  <div id="playback-controls" style="display:none; margin-top:1rem;">
-    <label for="speed">Speed:</label>
-    <select id="speed">
-      <option value="0.5">0.5×</option>
-      <option value="0.75">0.75×</option>
-      <option value="1" selected>1×</option>
-      <option value="1.25">1.25×</option>
-      <option value="1.5">1.5×</option>
-      <option value="2">2×</option>
-    </select>
+  <div id="playback-controls" style="display:none;">
+    <label>Speed:
+      <select id="speed">
+        <option value="0.5">0.5×</option>
+        <option value="0.75">0.75×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+      </select>
+    </label>
   </div>
 
   <audio id="player" controls style="display:none; width:100%; margin-top:1rem;"></audio>
 
   <script>
-    // Helpers to manage the key
+    // splitText: break input into chunks under ~2000 tokens (~4000 chars)
+    function splitText(text) {
+      const maxChars = 4000;
+      const paras = text.split(/\n{2,}/);
+      const chunks = [];
+      paras.forEach(p => {
+        if (p.length <= maxChars) return chunks.push(p);
+        const sentences = p.match(/[^.!?]+[.!?]*/g) || [p];
+        let buf = "";
+        sentences.forEach(s => {
+          if ((buf + s).length > maxChars) {
+            chunks.push(buf);
+            buf = s;
+          } else {
+            buf += s;
+          }
+        });
+        if (buf) chunks.push(buf);
+      });
+      return chunks;
+    }
+
+    // Key management
     const keyInput = document.getElementById("apiKey");
     const status   = document.getElementById("status");
     function loadKey() {
@@ -101,60 +120,82 @@
       const btn = document.getElementById("read");
       const genStatus = document.getElementById("genStatus");
       const player = document.getElementById("player");
-      const playbackControls = document.getElementById("playback-controls");
+      const pc = document.getElementById("playback-controls");
       const speedSelect = document.getElementById("speed");
 
       const apiKey = localStorage.getItem("OPENAI_API_KEY");
       if (!apiKey) return alert("Save your API key first!");
-      const text = document.getElementById("text").value;
+      const text = document.getElementById("text").value.trim();
       if (!text) return alert("Paste some text first!");
 
-      const model           = document.getElementById("model").value;
-      const voice           = document.getElementById("voice").value;
-      const response_format = document.getElementById("format").value;
-      const instructions    = document.getElementById("instr").value.trim();
+      // split into chunks
+      const segments = splitText(text);
+      if (segments.length > 1) {
+        genStatus.textContent = `Text split into ${segments.length} chunks`;
+      }
 
-      // UI feedback
+      // collect blob URLs
+      const urls = [];
       btn.disabled = true;
-      btn.textContent = "Generating audio...";
-      genStatus.textContent = "Please wait, generating audio…";
-      player.style.display = 'none';
-      playbackControls.style.display = 'none';
-      player.src = '';
+      btn.textContent = "Generating…";
+      genStatus.textContent = `Starting generation…`;
+      player.style.display = 'none'; pc.style.display = 'none';
 
       try {
-        const res = await fetch("https://api.openai.com/v1/audio/speech", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ model, voice, input: text, instructions: instructions||undefined, response_format })
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(()=>null);
-          throw new Error(err?.error?.message || res.statusText);
+        for (let i = 0; i < segments.length; i++) {
+          genStatus.textContent = `Generating chunk ${i+1}/${segments.length}…`;
+          const payload = {
+            model: document.getElementById("model").value,
+            voice: document.getElementById("voice").value,
+            input: segments[i],
+            instructions: document.getElementById("instr").value.trim()||undefined,
+            response_format: document.getElementById("format").value
+          };
+          const res = await fetch("https://api.openai.com/v1/audio/speech", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => {});
+            throw new Error(err?.error?.message || res.statusText);
+          }
+          const blob = await res.blob();
+          urls.push(URL.createObjectURL(blob));
         }
-        const blob = await res.blob();
-        const url  = URL.createObjectURL(blob);
-        player.src = url;
-        player.style.display = 'block';
-        playbackControls.style.display = 'block';
 
-        // adjust speed mid-playback
+        genStatus.textContent = 'All chunks generated. Playing…';
+        player.style.display = 'block'; pc.style.display = 'block';
+        let idx = 0;
+        player.src = urls[0];
+        player.playbackRate = parseFloat(speedSelect.value);
+        player.play();
+
+        // bind speed change mid-playback
         speedSelect.onchange = () => {
           player.playbackRate = parseFloat(speedSelect.value);
         };
 
-        // start playing
-        player.playbackRate = parseFloat(speedSelect.value);
-        await player.play();
+        player.onended = () => {
+          idx++;
+          if (idx < urls.length) {
+            genStatus.textContent = `Playing chunk ${idx+1}/${urls.length}…`;
+            player.src = urls[idx];
+            player.play();
+          } else {
+            genStatus.textContent = '✅ Done!';
+            btn.disabled = false;
+            btn.textContent = 'Generate Audio';
+            player.onended = null;
+          }
+        };
 
-        genStatus.textContent = "🎉 Audio is playing!";
       } catch (e) {
-        alert("TTS	error: " + e.message);
-        genStatus.textContent = "❌ Failed to generate audio.";
-      } finally {
+        alert("TTS error: " + e.message);
+        genStatus.textContent = "❌ Failed.";
         btn.disabled = false;
         btn.textContent = "Generate Audio";
       }

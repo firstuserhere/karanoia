@@ -49,10 +49,11 @@
   <label>Instructions:
     <input type="text" id="instr" placeholder="e.g. speak cheerfully"></label>
 
-  <button id="read">Generate Audio</button>
+  <button id="generateBtn">Generate Audio</button>
   <p id="genStatus"></p>
 
   <div id="playback-controls" style="display:none;" class="controls">
+    <button id="playBtn" style="padding:.5rem 1rem;">Play Audio</button>
     <label>Speed:
       <select id="speed">
         <option value="0.5">0.5×</option>
@@ -69,7 +70,6 @@
   <audio id="player" controls style="display:none; width:100%; margin-top:1rem;"></audio>
 
   <script>
-    // splitText: break input into chunks under ~2000 tokens (~4000 chars)
     function splitText(text) {
       const maxChars = 4000;
       const paras = text.split(/\n{2,}/);
@@ -79,110 +79,69 @@
         const sentences = p.match(/[^.!?]+[.!?]*/g) || [p];
         let buf = "";
         sentences.forEach(s => {
-          if ((buf + s).length > maxChars) {
-            chunks.push(buf);
-            buf = s;
-          } else {
-            buf += s;
-          }
+          if ((buf + s).length > maxChars) { chunks.push(buf); buf = s; } else { buf += s; }
         });
         if (buf) chunks.push(buf);
       });
       return chunks;
     }
 
-    // Key management
     const keyInput = document.getElementById("apiKey");
     const status   = document.getElementById("status");
     function loadKey() {
-      const k = localStorage.getItem("OPENAI_API_KEY");
-      if (k) { keyInput.value = k; status.textContent = "✔️ Key loaded"; }
+      const k = localStorage.getItem("OPENAI_API_KEY"); if (k) { keyInput.value = k; status.textContent = "✔️ Key loaded"; }
     }
-    function saveKey() {
-      const v = keyInput.value.trim();
-      if (!v) return alert("Enter your key first!");
-      localStorage.setItem("OPENAI_API_KEY", v);
-      status.textContent = "🔒 Key saved";
-    }
-    function clearKey() {
-      localStorage.removeItem("OPENAI_API_KEY");
-      keyInput.value = "";
-      status.textContent = "🔓 Key cleared";
-    }
+    function saveKey() { const v = keyInput.value.trim(); if (!v) return alert("Enter your key first!"); localStorage.setItem("OPENAI_API_KEY", v); status.textContent = "🔒 Key saved"; }
+    function clearKey() { localStorage.removeItem("OPENAI_API_KEY"); keyInput.value = ""; status.textContent = "🔓 Key cleared"; }
     document.getElementById("saveKey").onclick  = saveKey;
     document.getElementById("clearKey").onclick = clearKey;
     loadKey();
 
-    document.getElementById("read").onclick = async () => {
-      const btn = document.getElementById("read");
+    document.getElementById("generateBtn").onclick = async () => {
+      const btn = document.getElementById("generateBtn");
       const genStatus = document.getElementById("genStatus");
       const player = document.getElementById("player");
       const pc = document.getElementById("playback-controls");
       const speedSelect = document.getElementById("speed");
+      const playBtn = document.getElementById("playBtn");
       const downloadBtn = document.getElementById("downloadBtn");
 
-      const apiKey = localStorage.getItem("OPENAI_API_KEY");
-      if (!apiKey) return alert("Save your API key first!");
-      const text = document.getElementById("text").value.trim();
-      if (!text) return alert("Paste some text first!");
+      const apiKey = localStorage.getItem("OPENAI_API_KEY"); if (!apiKey) return alert("Save your API key first!");
+      const text = document.getElementById("text").value.trim(); if (!text) return alert("Paste some text first!");
 
-      // split into chunks
       const segments = splitText(text);
-
-      // prepare buffers
       const buffers = [];
-      btn.disabled = true;
-      btn.textContent = "Generating…";
+      btn.disabled = true; btn.textContent = "Generating…";
       genStatus.textContent = `Generating ${segments.length} segment(s)…`;
       player.style.display = 'none'; pc.style.display = 'none'; downloadBtn.style.display = 'none';
 
       try {
         for (let i = 0; i < segments.length; i++) {
           genStatus.textContent = `Generating segment ${i+1}/${segments.length}…`;
-          const payload = {
-            model: document.getElementById("model").value,
-            voice: document.getElementById("voice").value,
-            input: segments[i],
-            instructions: document.getElementById("instr").value.trim()||undefined,
-            response_format: document.getElementById("format").value
-          };
-          const res = await fetch("https://api.openai.com/v1/audio/speech", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-          if (!res.ok) {
-            const err = await res.json().catch(() => {});
-            throw new Error(err?.error?.message || res.statusText);
-          }
-          // collect raw data
+          const payload = { model: document.getElementById("model").value, voice: document.getElementById("voice").value, input: segments[i], instructions: document.getElementById("instr").value.trim()||undefined, response_format: document.getElementById("format").value };
+          const res = await fetch("https://api.openai.com/v1/audio/speech", { method: "POST", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+          if (!res.ok) { const err = await res.json().catch(() => {}); throw new Error(err?.error?.message || res.statusText); }
           buffers.push(await res.arrayBuffer());
         }
 
-        // combine and play
         const format = document.getElementById("format").value;
         const combined = new Blob(buffers, { type: `audio/${format}` });
         const url = URL.createObjectURL(combined);
-        player.src = url;
-        player.style.display = 'block';
-        pc.style.display = 'flex';
+        player.src = url; player.style.display = 'block'; pc.style.display = 'flex';
 
-        // enable download
-        downloadBtn.href = url;
-        downloadBtn.download = `speech.${format}`;
-        downloadBtn.style.display = 'inline-block';
+        downloadBtn.href = url; downloadBtn.download = `speech.${format}`; downloadBtn.style.display = 'inline-block';
 
-        // setup playback rate
         speedSelect.onchange = () => { player.playbackRate = parseFloat(speedSelect.value); };
         player.playbackRate = parseFloat(speedSelect.value);
 
-        btn.textContent = 'Play Audio';
-        btn.disabled = false;
-        btn.onclick = () => player.play();
-        genStatus.textContent = '✅ Ready to play';
+        playBtn.onclick = () => player.play();
+        playBtn.style.display = 'inline-block';
+
+        btn.disabled = false; btn.textContent = 'Generate Audio';
+        genStatus.textContent = 'It's Ready';
       } catch (e) {
         alert("TTS error: " + e.message);
-        genStatus.textContent = "❌ Failed.";
+        genStatus.textContent = "Generation Failed.";
         btn.disabled = false;
         btn.textContent = "Generate Audio";
       }

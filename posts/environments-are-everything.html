@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environments are everything</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            
+            <h1>Environments are everything</h1>
+            <p class="post-date">Published on June 20, 2025</p>
+
+            <blockquote class="quote-block">
+                <p>"The only way of discovering the limits of the possible is to venture a little way past them into the impossible"</p>
+                <footer>— Arthur C. Clarke</footer>
+            </blockquote>
+
+            <p>RL is the most exciting field to work in right now. LLMs are great for RL because they possess a huge amount of human knowledge, have incredibly strong priors, and are very sample efficient, making them perform quite well in lots of environments, even before seeing any environment-specific data.</p>
+            
+            <p>You can take existing strong base models and use RL to make them specialized on certain tasks that are hard to directly label. In the last ~6 months, there’s been a lot of work in this direction (all the different deep research products, codex agent, etc), especially on training a model to do web search and compile results end-to-end (o3). You have multi-agent systems with parallelized subagents (Claude research), and agents with tool-calling as part of their COT (o3, Claude's interleaved thinking) as a result of this.</p>
+
+            <p>All these are artifacts of training the model on short-horizon tasks using RL (mostly with verifiable rewards (or rather, checkable/gradeable rewards) so far), and making them robust by incorporating checkpointing, external scratchpad/memory, etc.</p>
+
+            <p>So far, progress has been the fastest where rewards are easily measurable. In most real world tasks, environments are significantly more complex and dynamic. Most jobs have poor documentation of what someone does on a day to day basis, and many important tasks are learned on the fly. You often work with partial information (say, why your manager’s manager is steering your project in a certain direction, or how your project translates to generating shareholder value), and the environment is always changing (another team you’re working with updated their system, you need to adapt). If you want your model to perform well in such an environment, you need to do a good amount of offline RL and some form of continual learning.</p>
+
+            <p>For a lot of tasks, I think a strategy similar to OpenAI’s RFT is worth trying.  Rather than building one big complicated grader for every possible use case, you can create powerful grading systems by combining lots of smaller, simple graders together. In the short term, this is mostly deterministic graders, but you can keep adding more primitives and meta-graders for non-deterministic tasks, and end up with a very expressive framework letting you optimize nearly everything (as long as you can specify what good performance looks like).</p>
+
+            <p>But as your grading system becomes more complex and tasks become longer-horizon and more agentic the risk of reward hacking increases.</p>
+
+            <p>You should first learn to predict the reward signal, and only then optimize it.</p>
+
+            <p>Setting the right signal takes a lot of empirical work and research even in a clear environment (ex: long coherence times stress even simple environments). I think engineering robust and scalable environments that are faithful to the goal and have the right reward functions is going to be very important to get customized models for every enterprise. </p>
+            <hr>
+            <p><a href="../index.html">&larr; Back to all posts</a></p>
+
+        </div>
+        
+        <footer class="contact-footer">
+            <div class="container">
+                <p>&copy; 2025 Kunvar Thaman (<a href="mailto:kunvar@mechinterp.com">email</a>, <a href="https://x.com/firstuserhere" target="_blank">X</a>, <a href="https://firstuserhere.github.io" target="_blank">socials</a>)</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

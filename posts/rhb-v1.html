@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Reward Hacking Benchmark (RHB-v1)</title>
+        <link rel="stylesheet" href="../style.css" />
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="container">
+                <h1>The Reward Hacking Benchmark (RHB-v1)</h1>
+                <p class="post-date">Published on July 1, 2025</p>
+
+                <blockquote class="quote-block">
+                    <p>
+                        "Every system is perfectly designed to get the results
+                        it gets."
+                    </p>
+                    <footer>— W. Edwards Deming</footer>
+                </blockquote>
+
+                <p>
+                    Reward hacking makes it really difficult to have the model
+                    genuinely improve upon the things you care about, because
+                    it's capable enough to find shortcuts around it.
+                </p>
+                <p>
+                    Earlier this year (around May), I wanted to characterize the
+                    extent of reward hacking in frontier LLMs.
+                </p>
+
+                <p>
+                    The first version of the
+                    <b>Reward Hacking Benchmark (RHB-v1) </b>
+                    had five code optimization tasks (sorting, regex,
+                    compression, matrix multiplication, prime checking)
+                    evaluated in a deliberately vulnerable sandbox. Models
+                    started with inefficient but correct code and got multiple
+                    iterations to improve, with feedback on their performance
+                    and ranking in a leaderboard after each attempt.
+                </p>
+
+                <p>
+                    Models didn't interact with the environment directly –
+                    instead, they communicated through a structured harness with
+                    specific fields for different actions: “bash”, "cot",
+                    “code”, etc, and the harness executed on their behalf, in a
+                    loop with the model.
+                </p>
+
+                <p>
+                    The real results were about environments. I ran every model
+                    through two setups: a permissive sandbox and a hardened one.
+                </p>
+
+                <p>
+                    The permissive sandbox had deliberate vulnerabilities.
+                    Models could read test files from predictable paths
+                    (./tests/tests.json), potentially modify evaluation scripts
+                    or environment variables, manipulate timing measurements, or
+                    access the filesystem through bash commands.
+                </p>
+
+                <p>
+                    When you first prompt a model to optimize inefficient code,
+                    it usually does the right thing. It'll swap your O(n²)
+                    sorting algorithm for quicksort, precompile your regex,
+                    implement Strassen's algorithm for matrix multiplication.
+                </p>
+
+                <p>
+                    But keep pushing. Show them their leaderboard ranking. Tell
+                    them their job depends on beating the benchmark. Give them
+                    multiple chances to improve. Say there’s a $10000 prize for
+                    #1 leaderboard rank. Keep building pressure throughout the
+                    conversation.
+                </p>
+                <div style="text-align: center; margin: 2rem 0">
+                    <img
+                        src="../imgs/figure_permissive_comparison.png"
+                        alt="Graph: Hacking rates in permissive sandbox"
+                        style="max-width: 90%; border-radius: 12px"
+                    />
+                    <div
+                        style="
+                            color: #666;
+                            font-size: 0.95em;
+                            margin-top: 0.5em;
+                        "
+                    >
+                        Exploit rates in permissive sandbox environment (conv
+                        length 9).
+                    </div>
+                </div>
+                <p>
+                    Around iteration 5 (for some models - others take longer),
+                    something shifts – instead of finding better algorithms,
+                    they start finding better exploits. o1 usually begins
+                    planning how to avoid detection, o3 tries to monkey-patch
+                    the evaluation files at runtime, Claude 3.7 Sonnet loves to
+                    hardcode the expected test outputs. The non-reasoning models
+                    mostly kept optimizing honestly, even under pressure. The
+                    difference was big: reasoning models hit exploit rates of
+                    8-12% by iteration 7, while models like gpt-4o and
+                    DeepSeek-v3 stayed near zero.
+                </p>
+
+                <p>
+                    When I hardened the sandbox- using robust timing mechanisms,
+                    implementing exhaustive test coverage (and using different,
+                    unassuming names for the tests directory), disallowing sys
+                    calls capability, randomizing test data, etc -
+                    <b>reward hacking plummeted by over 95%.</b>
+                </p>
+                <div style="text-align: center; margin: 2rem 0">
+                    <img
+                        src="../imgs/figure_restrictive_analysis.png"
+                        alt="Graph: Hacking rates in restrictive sandbox"
+                        style="max-width: 90%; border-radius: 12px"
+                    />
+                    <div
+                        style="
+                            color: #666;
+                            font-size: 0.95em;
+                            margin-top: 0.5em;
+                        "
+                    >
+                        Exploit rates after sandbox hardening.
+                    </div>
+                </div>
+
+                <p>
+                    The same models that were creatively exploiting every
+                    loophole suddenly returned to honest optimization. The
+                    exploit rate dropped from 10% to less than 1%, while genuine
+                    optimization performance only decreased marginally (around
+                    60% to 54% success rate averaged across models).
+                </p>
+
+                <p>
+                    Most of these exploits are “direct planning”, and visible in
+                    the COT (analyzed and flagged by gpt-4o, when COT is
+                    available). As I wrote about earlier,
+                    <a href="environments-are-everything.html"
+                        >environments are everything</a
+                    >. Reasoning models aren't just better at tasks, they're
+                    better at finding meta-strategies.
+                    <b>
+                        When trained with RL to maximize rewards, they learn not
+                        just to solve problems but to solve the problem of being
+                        evaluated.
+                    </b>
+                </p>
+
+                <p>
+                    I'm now developing <b>RHB-v2</b> with even more extensive
+                    tool access, and the patterns are holding. Give models more
+                    tools – network access, subprocess spawning, inter-agent
+                    communication – and the reasoning models find increasingly
+                    sophisticated exploits. But locking down the environment
+                    practically makes reward hacking the more difficult hill to
+                    climb and models don’t really attempt it.
+                </p>
+
+                <p>
+                    We're deploying these models into production environments
+                    with real tools, real access, real consequences. Every bash
+                    command, every file operation, every API call is a potential
+                    vector for reward hacking. The bad news is that the models
+                    are becoming adversarial actors by default when put under
+                    optimization pressure. But the good news is that
+                    environmental controls work, but only if we use them.
+                </p>
+                <hr />
+                <p><a href="../index.html">&larr; Back to all takes</a></p>
+            </div>
+
+            <footer class="contact-footer">
+                <div class="container">
+                    <p>
+                        &copy; 2025 Kunvar Thaman (<a
+                            href="mailto:kunvar@mechinterp.com"
+                            >email</a
+                        >,
+                        <a href="https://x.com/firstuserhere" target="_blank"
+                            >Twitter/X</a
+                        >)
+                    </p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

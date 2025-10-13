@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Datacenter Cooling mental model</title>
+        <link rel="stylesheet" href="../style.css" />
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="container">
+                <h1>Datacenter Cooling mental model</h1>
+                <p>
+                    <strong
+                        >The goal is to move heat from silicon to sky with as
+                        little energy as possible.</strong
+                    >
+                </p>
+
+                <p>
+                    Let’s say a GPU takes in P watts of electrical power. In
+                    steady state, P watts must leave as heat, otherwise the
+                    junction gets cooked.
+                </p>
+
+                <p>
+                    Heat leaves the silicon die by conduction, and at the lid it
+                    will leave either via air, or a coolant if we put one there.
+                    There’s a “cold plate” separating the chip from the outside
+                    world. Cold plates are typically copper with
+                    electroless-nickel plating to control corrosion and copper
+                    ion release, and are bolted to the package.
+                </p>
+
+                <p>
+                    At the cold plate (or a heatsink, if air-cooled) the heat
+                    transfers to a fluid, which carries it away at Q = ṁ · c ·
+                    ΔT. For air, c ≈ 1.0 kJ/kg·K and density ≈ 1.2 kg/m³ at room
+                    conditions. Even allowing a 10 °C temperature difference,
+                    removing 1 kW needs about 0.10 kg/s = ~0.083 m³/s = 176
+                    cubic feet per minute (CFM) of air. For a server with 30kW,
+                    it’d need ~1,000 CFM, and the outlet air would climb roughly
+                    50–55 °C, which is insane for everything downstream, plus an
+                    additional ~2-3 kW for the fan itself.
+                </p>
+
+                <p>
+                    So we introduce a liquid. The ideal coolant carries a lot of
+                    heat per kilogram (high c), flows easily (low viscosity),
+                    and conducts heat well (higher k). Treated water is pretty
+                    much the best with c ≈ 4.18 kJ/kg·K and k ≈ 0.6 W/m·K.
+                    There’s still air flow to help out with other components
+                    like pluggable optics or storage, but the chip is the main
+                    source of heat and is liquid cooled (this is changing
+                    though, almost everything is starting to be liquid cooled).
+                </p>
+
+                <p>
+                    The cold plate typically has microchannels that bring
+                    fast-moving coolant to ~1.5-3 mm of the heat source (the
+                    junction). In lidless/direct-to-die designs, it can be cut
+                    down to ~0.5–1 mm.
+                </p>
+
+                <p>
+                    Via the cold plate, the coolant takes the heat from the
+                    silicon, and leaves the server through short hoses into a
+                    rack manifold (the plumbing inside the rack that splits
+                    supply/return to each server sled). Each hose terminates in
+                    non-spill quick-disconnects, which have valves on both
+                    halves that close automatically when you uncouple, like an
+                    airlock system. When a technician pulls one out, almost no
+                    liquid drips, and when they reconnect, the two-valve system
+                    limits air entering the system.
+                </p>
+
+                <p>
+                    From the rack manifold, the warmed coolant enters a “<strong
+                        >Coolant Distribution Unit</strong
+                    >” (CDU). This is a small box beside the rack whose job is
+                    to keep the server’s heat loop separate from the building’s
+                    larger loop (“facility loop”). Inside the CDU, there’s a
+                    plate heat-exchanger (a stack of thin metal plates) that
+                    moves heat without mixing the fluids. The fluid on the other
+                    loop is also water flowing in the opposite direction (to
+                    maximize the log-mean temperature difference, so more heat
+                    crosses for a given area).
+                </p>
+
+                <p>
+                    Now, the facility water cannot cool the server water below
+                    its own temperature. So if you want the server water out at
+                    30°C, the facility water must arrive colder than 30°C,
+                    because you need a temperature difference to drive heat
+                    transfer. The smaller this difference, the bigger and more
+                    expensive the heat exchanger.
+                    <strong>Most datacenters keep this at ~ 2-3°C.</strong>
+                </p>
+
+                <p>
+                    The heat has now moved into a much larger “facility” loop.
+                    It’s a bigger, slower, steadier river of water whose job is
+                    to aggregate rack heat. Inside this facility loop there are
+                    pumps to maintain a differential-pressure setpoint so every
+                    rack gets the appropriate amount of cooling. It also has a
+                    bunch of equipment for stuff like stripping microbubbles,
+                    filtration, water-treatment stuff to maintain pH,
+                    conductivity, etc.
+                </p>
+
+                <p>
+                    The facility loop is a closed circuit of warm water
+                    circulating inside the building. That water is pumped out to
+                    a heat-rejection plant (usually the roof, or the yard),
+                    where it flows inside finned coils. There are fans blowing
+                    outdoor air across these fins, and essentially the heat is
+                    moving from water to fin coil to air. In cold climates, data
+                    centers usually add <strong>propylene glycol</strong> to any
+                    loop that’s exposed to freezing risk, trading a small hit to
+                    c and viscosity (like in Stargate Norway).
+                </p>
+
+                <p>
+                    The amount of heat that can be rejected here depends on
+                    surface area and the temperature gap (ΔT) between the water
+                    and the air. If the outside temperature is hot, ΔT shrinks,
+                    and dry coolers aren’t enough.<strong
+                        >So, there are air-cooled chillers</strong
+                    >. The idea is to have a compressor do work; its condenser
+                    dumps that heat to air through its own fan-cooled coils.
+                    This is essentially
+                    <strong
+                        >trading water for electricity and coil area.</strong
+                    >
+                </p>
+
+                <p>
+                    For example, take Stargate’s Abilene site. It uses
+                    closed-loop, non-evaporative liquid cooling systems, and
+                    draws from the ERCOT grid. After a one-time filling of ~1
+                    million gallons, the expected water usage is only ~12000
+                    gallons per building per year. So, every degree that can be
+                    afforded to be warmer at the chip level (and thus warmer on
+                    the facility return) saves fan power and avoids compressor
+                    hours.
+                </p>
+
+                <p>
+                    Cooling only works if the power does. The goal is to
+                    <strong
+                        >run dry-coolers for as many hours as possible and
+                        minimize compressor/chiller hours</strong
+                    >, because they're really power-intensive.
+                </p>
+
+                <p>
+                    For a dry-cooler only day, the power draw is minimal -
+                    ~10-15 MW of a 500 MW DC, with 97% of the power going to the
+                    servers. But on some hot hybrid day (~30% of the day you
+                    need to use the chillers), the same 500MW DC would need
+                    ~60-65 MW for cooling (~10-15%), only 85-90% of the power
+                    going to the servers. And on a really hot day, with chillers
+                    used ~100% of the day, you’d need 200+ MW for the cooling,
+                    only 60-70% power going to the server. That’s why power is
+                    the biggest constraint in practice for DCs.
+                </p>
+
+                <p><a href="../index.html">&larr; Back to main page</a></p>
+            </div>
+        </div>
+    </body>
+</html>

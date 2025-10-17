@@ -30,6 +30,7 @@ body {
     0 4px 6px rgba(0, 0, 0, 0.3),
     0 10px 20px rgba(0, 0, 0, 0.2);
   position: relative;
+  min-height: 400px;
 }
 
 .about-link {
@@ -37,7 +38,6 @@ body {
   top: 2rem;
   right: 2.5rem;
   font-size: 0.9rem;
-  color: #888;
 }
 
 .about-link a {
@@ -48,7 +48,6 @@ body {
 
 .about-link a:hover {
   color: #4a9eff;
-  text-decoration: none;
 }
 
 h1 {
@@ -225,5 +224,10 @@ p + p {
   
   .post-image img {
     max-width: 100%;
+  }
+  
+  .about-link {
+    top: 1.5rem;
+    right: 1.5rem;
   }
 }

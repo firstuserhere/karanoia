@@ -48,7 +48,7 @@ h2 {
   font-weight: 400;
   margin-top: 2.5rem;
   margin-bottom: 1rem;
-  color: #ffffff;
+  color: #e5e5e5;
 }
 
 p {
@@ -74,12 +74,36 @@ p + p {
 }
 
 /* Posts list - no underlines */
+.posts-list p {
+  margin-bottom: 0.75rem;
+}
+
 .posts-list a {
   text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s ease, color 0.2s ease;
 }
 
 .posts-list a:hover {
   text-decoration: underline;
+  transform: translateX(3px);
+}
+
+.post-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.post-title {
+  flex: 1;
+}
+
+.post-list-date {
+  color: #777;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .contact-footer {
@@ -115,9 +139,10 @@ p + p {
 }
 
 .post-date {
-  color: #888;
-  font-size: 0.9rem;
+  color: #777;
+  font-size: 0.85rem;
   margin-top: -1rem;
+  margin-bottom: 1.5rem;
 }
 
 .quote-block {

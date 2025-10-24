@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+User-agent: ia_archiver
+Allow: /
+
 Sitemap: https://kunvarthaman.com/sitemap.xml

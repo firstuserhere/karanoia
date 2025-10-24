@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://kunvarthaman.com/</loc><lastmod>2025-10-21</lastmod></url>
-  <url><loc>https:\/kunvarthaman.com/about.html</loc><lastmod>2025-10-17</lastmod></url>
+  <url><loc>https://kunvarthaman.com/</loc><lastmod>2025-10-24</lastmod></url>
+  <url><loc>https:\/kunvarthaman.com/about.html</loc><lastmod>2025-10-23</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/listen/</loc><lastmod>2025-06-19</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/posts/data-center-power-flow.html</loc><lastmod>2025-10-18</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/posts/datacenter-cooling-mental-model.html</loc><lastmod>2025-10-14</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/posts/environments-are-everything.html</loc><lastmod>2025-06-20</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/posts/goodbye-the-human-evaluator.html</loc><lastmod>2025-10-17</lastmod></url>
-  <url><loc>https:\/kunvarthaman.com/posts/infrastructure-is-important.html</loc><lastmod></lastmod></url>
+  <url><loc>https:\/kunvarthaman.com/posts/infrastructure-is-important.html</loc><lastmod>2025-10-21</lastmod></url>
+  <url><loc>https:\/kunvarthaman.com/posts/llm-inference.html</loc><lastmod>2025-10-24</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/posts/reward-hacking-research.html</loc><lastmod>2025-06-08</lastmod></url>
   <url><loc>https:\/kunvarthaman.com/posts/rhb-v1.html</loc><lastmod>2025-07-20</lastmod></url>
 </urlset>

@@ -9,7 +9,7 @@
 <body>
 <div class="wrapper">
 <div class="container">
-<h1>LLM Serving Pipeline</h1>
+<h1>A systems level understanding of LLM inference</h1>
 <p class="post-date">October 24, 2025</p>
 
 <p>A user types in a prompt and hits send. The prompt leaves the device over HTTPS as a payload, and stays encrypted till it's on the provider’s API gateway, where the TLS terminates. Here, the payload is inspected for authenticity, rate limits, quota, abuse filters, etc. Then, the request is routed to an inference serving engine. The job of this engine is to manage the queue of thousands of incoming requests and allocate them to hardware efficiently. </p>

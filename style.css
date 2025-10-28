@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&family=Crimson+Text:wght@400;600&display=swap');
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.6;
-  color: #ffffff;
+  line-height: 1.8;
+  color: #333;
   margin: 0;
   padding: 0;
-  background-color: #0f0f0f;
-  font-size: 16px;
+  background-color: #faf9f6;
+  font-size: 18px;
   font-weight: 400;
   min-height: 100vh;
 }
@@ -16,85 +16,81 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 3rem 1.5rem;
+  padding: 6rem 2rem;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 3rem 3.5rem;
+  padding: 0;
   flex: 1;
-  background-color: #1a1a1a;
-  border-radius: 16px;
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 10px 20px rgba(0, 0, 0, 0.2);
+  background-color: transparent;
   position: relative;
   min-height: 400px;
 }
 
 .about-link {
   position: absolute;
-  top: 2rem;
-  right: 2.5rem;
-  font-size: 0.9rem;
+  top: 0;
+  right: 0;
+  font-size: 1rem;
 }
 
 .about-link a {
-  color: #888;
+  color: #8b7355;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .about-link a:hover {
-  color: #4a9eff;
+  color: #6b5a45;
 }
 
 h1 {
   font-family: 'EB Garamond', serif;
-  font-size: 2.8rem;
+  font-size: 3.5rem;
   font-weight: 400;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
   margin-top: 0;
-  line-height: 1.3;
+  line-height: 1.2;
   text-align: left;
-  color: #ffffff;
+  color: #2c2c2c;
 }
 
 h2 {
   font-family: 'EB Garamond', serif;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 400;
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-  color: #e5e5e5;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+  color: #2c2c2c;
 }
 
 p {
-  font-size: 1.05rem;
-  margin-bottom: 1.25rem;
-  line-height: 1.7;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  line-height: 1.9;
   font-weight: 400;
-  color: #e5e5e5;
+  color: #333;
 }
 
 a {
-  color: #4a9eff;
+  color: #8b7355;
   text-decoration: underline;
   transition: color 0.2s ease;
 }
 
 a:hover {
-  color: #6bb0ff;
+  color: #6b5a45;
 }
 
 p + p {
-  margin-top: 0.9rem;
+  margin-top: 1.5rem;
 }
 
 /* Posts list - no underlines */
 .posts-list p {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .posts-list a {
@@ -120,34 +116,34 @@ p + p {
 }
 
 .post-list-date {
-  color: #777;
-  font-size: 0.85rem;
+  color: #8b7355;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
 .contact-footer {
-  margin-top: 2rem;
-  padding: 1.5rem 0 0 0;
-  border-top: 1px solid #2a2a2a;
-  font-size: 0.9rem;
-  color: #888;
+  margin-top: 4rem;
+  padding: 2rem 0 0 0;
+  border-top: 1px solid #d4c4aa;
+  font-size: 0.95rem;
+  color: #8b7355;
   width: 100%;
 }
 
 .contact-footer p {
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  line-height: 1.6;
   text-align: center;
   margin-bottom: 0;
-  color: #888;
+  color: #8b7355;
 }
 
 .contact-footer a {
-  color: #888;
+  color: #8b7355;
 }
 
 .contact-footer a:hover {
-  color: #4a9eff;
+  color: #6b5a45;
 }
 
 .contact-footer .container {
@@ -158,20 +154,20 @@ p + p {
 }
 
 .post-date {
-  color: #777;
-  font-size: 0.85rem;
-  margin-top: -1rem;
-  margin-bottom: 1.5rem;
+  color: #8b7355;
+  font-size: 0.9rem;
+  margin-top: -2rem;
+  margin-bottom: 3rem;
 }
 
 .quote-block {
-  margin: 2rem 0;
-  padding: 1rem;
+  margin: 3rem 0;
+  padding: 2rem;
   text-align: center;
   font-style: italic;
-  color: #aaa;
-  border-left: 3px solid #2a2a2a;
-  border-right: 3px solid #2a2a2a;
+  color: #666;
+  border-left: 2px solid #d4c4aa;
+  border-right: 2px solid #d4c4aa;
 }
 
 .quote-block footer {
@@ -183,43 +179,46 @@ p + p {
 /* Post-specific styles */
 .post-image {
   text-align: center;
-  margin: 2.5rem 0;
+  margin: 4rem 0;
 }
 
 .post-image img {
   max-width: 90%;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .back-link {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #2a2a2a;
+  margin-top: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid #d4c4aa;
 }
 
 .back-link a {
-  color: #888;
-  font-size: 0.95rem;
+  color: #8b7355;
+  font-size: 1rem;
 }
 
 .back-link a:hover {
-  color: #4a9eff;
+  color: #6b5a45;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .wrapper {
-    padding: 1.5rem 1rem;
+    padding: 3rem 1.5rem;
   }
   
   .container {
-    padding: 2rem 1.5rem;
-    border-radius: 12px;
+    padding: 0;
   }
   
   h1 {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
+  }
+  
+  h2 {
+    font-size: 1.6rem;
   }
   
   .post-image img {
@@ -227,7 +226,7 @@ p + p {
   }
   
   .about-link {
-    top: 1.5rem;
-    right: 1.5rem;
+    top: 0;
+    right: 0;
   }
 }

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A short note on DeepSeek v3.2</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrapper">
+<div class="container">
+<h1>A short note on DeepSeek v3.2</h1>
+<p class="post-date">December 10, 2025</p>
+
+<p><a href="https://arxiv.org/abs/2512.02556">DeepSeek v3.2</a> was released a few days ago. I thought I’d write down some of my thoughts as I read the report.</p>
+
+<p><a href="https://arxiv.org/html/2412.19437v1">DeepSeek v3</a> was a MoE with <a href="https://machinelearningmastery.com/a-gentle-introduction-to-multi-head-latent-attention-mla/">Multi-head Latent Attention</a> (MLA).  The idea with MLA was to compress the Q, K and V tensors into a lower dimensional space before storing them in the KV cache table. At inference time, the compressed tensors are projected back into the original size before being used. This is basically trading some extra multiplication of tensors (cheap) for reduced memory storage.</p>
+
+<p>Then, using v3 as the base model, R1 was trained with RLVR (with GRPO) to improve reasoning capabilities of the model. The rewards in this setup were a format reward (to ensure the answer is properly formatted), a language consistency reward (because the model would otherwise switch languages in the CoT and output), and the correctness reward (is the final answer correct?).</p>
+
+<p>However, getting the correct answer doesn’t mean the whole trajectory of reasoning that led to the answer was correct, and just because the answer is incorrect doesn’t mean that the entire reasoning process was flawed, and not every problem has a final numerical answer. In <a href="https://arxiv.org/html/2511.22570v1">DeepSeek Math v2</a>, they address this by training 2 models, a proof-creator and a proof-verifier. This is very similar to the GAN setup. The proof-creator generates a proof that is taken in by the proof-verifier along with a rubric to score this proof. The score is 1 for complete and rigorous proofs with all correct steps, 0.5 with overall sound logic but minor errors, and 0 for fundamentally flawed proofs. As with GANs, the two models try to out-compete each other, improving in the process. The bottleneck becomes the adversarial network’s quality, and in this case, the proof-verifier model’s quality.   
+To prevent it from hallucinating issues and to make it more robust, they trained a 3rd model, a meta-verifier. The meta-verifier verifies whether the proof-verifier is verifying the proof-generator’s outputs correctly.</p>
+
+<p>A key point in this setup is that the proof-generator, proof-verifier, and the meta-verifier are 3 different models, and not the same LLM, as is the case in a lot of setups. The DeepSeek team found that when both the generator and verifier are the same model, the model fails to apply the same rigor to evaluating its work as a dedicated model does. However, once the generator becomes strong under the scrutiny of the verifier and the meta-verifier, they discard these other models and use just a single model during inference (the proof-generator).</p>
+
+<p>Now, coming to v3.2, it was trained with math, tool-use, code, and agentic tasks in mind. It has the same Multi-Head Latent Attention as v3, but also adds in <a href="https://www.reddit.com/r/MachineLearning/comments/1o2pzxk/comment/nipo2nn/">DeepSeek Sparse Attention</a> (DSA) which is a sliding window attention but the window is dynamic and is selected by an indexer and a token selector. After tokenization, the indexer computes similarity scores of past tokens to the query, the selector selects the best k scores, and a mask is applied to the other tokens. Then, attention is computed as usual. What this accomplishes is that each token attends to a few past tokens (which saves lots of computation) that the model has learned to consider as most relevant (improves model long-term), rather than every single token in the past (expensive), or all the tokens in a fixed sliding window (potentially stupid).</p>
+
+<p>For v3.2 they also changed the rewards in the RL setup. They removed the format reward, added in a length penalty for agentic tasks, used a reward model instead of a correctness reward for general tasks, and kept the language consistency reward. For math problems, they used the data and the generator-verifier-meta-verifier setup from DeepSeek Math v2.</p>
+
+<p>They significantly relaxed the KL penalty because the model needs to drift away from the base landscape to explore creative solutions to hard problems, and they stabilized this by making a bunch of improvements to GRPO.</p>
+
+<p class="back-link"><a href="../index.html">&larr; Back to main page</a></p>
+</div>
+</div>
+</body>
+</html>

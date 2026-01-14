@@ -145,6 +145,11 @@ p {
   color: #0f2147;
 }
 
+.post-body p,
+.about-content p {
+  font-size: 1.05rem;
+}
+
 a {
   color: #1f4b99;
   text-decoration: underline;
@@ -215,7 +220,7 @@ p + p {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 4rem;
-  padding: 0.25rem 0;
+  padding: 0.05rem 0;
   border-bottom: 1px solid #d6e2f0;
   font-size: 0.9rem;
 }

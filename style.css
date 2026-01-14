@@ -88,7 +88,7 @@ p + p {
   margin-top: 1.5rem;
 }
 
-/* Posts list - no underlines */
+/* Posts list */
 .posts-list p {
   margin-bottom: 1.5rem;
 }
@@ -119,6 +119,38 @@ p + p {
   color: #8b7355;
   font-size: 0.9rem;
   white-space: nowrap;
+}
+
+/* Wide layout for fragments page */
+.wide-wrapper {
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
+.wide-container {
+  max-width: none;
+  width: 100%;
+}
+
+.wide-container .posts-list {
+  border-top: 1px solid #d4c4aa;
+}
+
+.wide-container .posts-list p {
+  margin-bottom: 0;
+}
+
+.wide-container .post-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #d4c4aa;
+  font-size: 0.9rem;
+}
+
+.wide-container .post-list-date {
+  font-size: 0.85rem;
 }
 
 .contact-footer {
@@ -203,147 +235,58 @@ p + p {
   color: #6b5a45;
 }
 
-/* Category Fragments - Burnt Paper Style */
-.category-fragments {
+/* Category Grid */
+.category-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-top: 2rem;
-  align-items: start;
+  gap: 2rem 3rem;
+  margin-top: 1.5rem;
 }
 
-@keyframes float-gentle {
-  0%, 100% {
-    transform: translate(0px, 0px) rotate(0deg);
-  }
-  50% {
-    transform: translate(5px, -12px) rotate(0.5deg);
-  }
-}
-
-.fragment {
-  padding: 2.5rem;
-  position: relative;
-  cursor: pointer;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-  min-height: 120px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  animation: float-gentle 4s ease-in-out infinite;
-}
-
-.fragment:hover {
-  animation-play-state: paused;
-  transform: translateY(-5px);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
-}
-
-.fragment h3 {
+.category-section h3 {
   font-family: 'EB Garamond', serif;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin: 0;
+  margin: 0 0 0.75rem 0;
   color: #2c2c2c;
-  text-align: center;
-  z-index: 1;
 }
 
-/* Fragment 1 - Light burn, cream/yellow tones */
-.fragment:nth-child(1) {
-  background:
-    radial-gradient(ellipse at center, #fdfbf7 0%, #faf6ed 35%, #f0e6d2 65%, #d4b896 82%, #a0805a 92%, #5d4a35 100%);
-  box-shadow:
-    inset 0 0 15px rgba(160, 128, 90, 0.25),
-    0 3px 10px rgba(0, 0, 0, 0.15);
-  border-radius: 3px 2px 4px 2px;
-  clip-path: polygon(
-    2% 3%, 8% 1%, 15% 2%, 22% 1%, 30% 2%, 38% 1%, 45% 2%, 53% 1%,
-    61% 2%, 69% 1%, 77% 2%, 85% 1%, 92% 2%, 98% 3%,
-    99% 10%, 98% 18%, 99% 26%, 98% 34%, 99% 42%, 98% 50%, 99% 58%,
-    98% 66%, 99% 74%, 98% 82%, 99% 90%, 98% 97%,
-    92% 98%, 85% 99%, 77% 98%, 69% 99%, 61% 98%, 53% 99%, 45% 98%,
-    38% 99%, 30% 98%, 22% 99%, 15% 98%, 8% 99%, 2% 97%,
-    1% 90%, 2% 82%, 1% 74%, 2% 66%, 1% 58%, 2% 50%, 1% 42%,
-    2% 34%, 1% 26%, 2% 18%, 1% 10%
-  );
-  transform: translateX(-8px);
-  animation-duration: 5s;
-  animation-delay: 0s;
+.category-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-/* Fragment 2 - Medium burn with darker right edge */
-.fragment:nth-child(2) {
-  background:
-    radial-gradient(ellipse 110% 100% at 40% 50%, #fdfbf7 0%, #f9f3e8 30%, #ecdab8 55%, #d1b488 75%, #9a7a4e 88%, #6b5438 96%, #3d2e1f 100%);
-  box-shadow:
-    inset 0 0 25px rgba(107, 84, 56, 0.35),
-    inset 15px 0 20px rgba(61, 46, 31, 0.3),
-    0 3px 10px rgba(0, 0, 0, 0.18);
-  border-radius: 2px 3px 2px 4px;
-  clip-path: polygon(
-    1% 4%, 9% 2%, 16% 3%, 24% 1%, 32% 3%, 40% 2%, 48% 3%, 56% 1%,
-    64% 2%, 72% 3%, 80% 1%, 87% 3%, 94% 2%, 98% 4%,
-    99% 12%, 97% 20%, 99% 28%, 97% 36%, 99% 44%, 97% 52%, 99% 60%,
-    97% 68%, 99% 76%, 97% 84%, 99% 92%, 97% 96%,
-    94% 98%, 87% 97%, 80% 99%, 72% 97%, 64% 98%, 56% 99%, 48% 97%,
-    40% 98%, 32% 97%, 24% 99%, 16% 97%, 9% 98%, 1% 96%,
-    2% 92%, 1% 84%, 3% 76%, 1% 68%, 3% 60%, 1% 52%, 3% 44%,
-    1% 36%, 3% 28%, 1% 20%, 3% 12%
-  );
-  transform: translateX(12px) translateY(15px);
-  animation-duration: 4.5s;
-  animation-delay: 1s;
+.category-section li {
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-/* Fragment 3 - Medium burn with darker left edge */
-.fragment:nth-child(3) {
-  background:
-    radial-gradient(ellipse 110% 100% at 60% 50%, #fdfbf7 0%, #f8f1e5 32%, #ead8b6 58%, #cfb586 78%, #a38555 90%, #785d3e 97%, #4a3726 100%);
-  box-shadow:
-    inset 0 0 20px rgba(120, 93, 62, 0.35),
-    inset -15px 0 20px rgba(74, 55, 38, 0.3),
-    0 3px 10px rgba(0, 0, 0, 0.17);
-  border-radius: 4px 2px 3px 2px;
-  clip-path: polygon(
-    3% 2%, 10% 1%, 18% 3%, 26% 1%, 34% 2%, 42% 1%, 50% 3%, 58% 1%,
-    66% 2%, 74% 1%, 82% 3%, 89% 1%, 96% 2%, 99% 3%,
-    98% 11%, 99% 19%, 97% 27%, 99% 35%, 97% 43%, 99% 51%, 97% 59%,
-    99% 67%, 97% 75%, 99% 83%, 97% 91%, 99% 97%,
-    96% 98%, 89% 99%, 82% 97%, 74% 99%, 66% 98%, 58% 99%, 50% 97%,
-    42% 99%, 34% 98%, 26% 99%, 18% 97%, 10% 99%, 3% 98%,
-    1% 91%, 3% 83%, 1% 75%, 3% 67%, 1% 59%, 3% 51%, 1% 43%,
-    3% 35%, 1% 27%, 3% 19%, 1% 11%
-  );
-  transform: translateX(5px) translateY(-10px);
-  animation-duration: 5.5s;
-  animation-delay: 2s;
+.category-section a {
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-/* Fragment 4 - Heavier burn with more charred bottom edge */
-.fragment:nth-child(4) {
-  background:
-    radial-gradient(ellipse 100% 110% at 50% 40%, #fdfbf7 0%, #f7f0e0 28%, #e9d8b5 50%, #cdb081 70%, #a3824f 85%, #7a5f3d 94%, #483525 100%);
-  box-shadow:
-    inset 0 0 20px rgba(122, 95, 61, 0.4),
-    inset 0 15px 25px rgba(72, 53, 37, 0.25),
-    0 3px 10px rgba(0, 0, 0, 0.2);
-  border-radius: 2px 4px 2px 3px;
-  clip-path: polygon(
-    2% 4%, 11% 2%, 19% 3%, 27% 1%, 35% 3%, 43% 2%, 51% 3%, 59% 1%,
-    67% 3%, 75% 2%, 83% 3%, 90% 1%, 97% 3%, 99% 4%,
-    97% 13%, 99% 21%, 96% 29%, 99% 37%, 96% 45%, 99% 53%, 96% 61%,
-    99% 69%, 96% 77%, 99% 85%, 96% 93%, 99% 96%,
-    97% 97%, 90% 99%, 83% 97%, 75% 98%, 67% 97%, 59% 99%, 51% 97%,
-    43% 98%, 35% 97%, 27% 99%, 19% 97%, 11% 98%, 2% 96%,
-    1% 93%, 4% 85%, 1% 77%, 4% 69%, 1% 61%, 4% 53%, 1% 45%,
-    4% 37%, 1% 29%, 4% 21%, 1% 13%
-  );
-  transform: translateX(-5px) translateY(20px);
-  animation-duration: 4.8s;
-  animation-delay: 0.5s;
+.category-section a:hover {
+  text-decoration: underline;
+}
+
+.fragments-heading {
+  font-size: 2.5rem;
+}
+
+.all-fragments-link {
+  margin-top: 2rem;
+  font-size: 1rem;
+}
+
+.all-fragments-link a {
+  text-decoration: none;
+}
+
+.all-fragments-link a:hover {
+  text-decoration: underline;
 }
 
 /* Responsive adjustments */
@@ -373,7 +316,7 @@ p + p {
     right: 0;
   }
 
-  .category-fragments {
+  .category-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }

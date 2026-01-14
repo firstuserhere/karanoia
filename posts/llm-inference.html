@@ -7,12 +7,13 @@
 <title>LLM Serving Pipeline</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="post-page">
+<body class="post-page narrow-two-column-page">
 <div class="wrapper">
 <div class="container">
 <h1>A systems level understanding of LLM inference</h1>
 <p class="post-date">Published on October 24, 2025<br>Last updated on October 28, 2025</p>
 
+<div class="post-body">
 <p>A user types in a prompt and hits send. The prompt leaves the device over HTTPS as a payload, and stays encrypted till it's on the provider’s API gateway, where the TLS terminates. Here, the payload is inspected for authenticity, rate limits, quota, abuse filters, etc. Then, the request is routed to an inference serving engine. The job of this engine is to manage the queue of thousands of incoming requests and allocate them to hardware efficiently. </p>
 
 <p>A single replica of a LLM is a distributed program running on a group of accelerators (GPUs, TPUs, etc). The distribution of the model is called parallelism, and there’s a bunch of strategies for that (tensor, pipeline, expert, and even the sequence of tokens itself - sequence parallelism). The weights of the model are a set of checkpoint files (TBs of data), generated from training, and are stored in persistent object storage. There could be a quantized copy of the weights to save on space and speed. For example, by using an FP4 or INT8 quantized model, the system reads 4x or 2x as many weights from HBM in the same amount of time as an FP16 model.</p>
@@ -56,6 +57,7 @@
 <p>The context window is decoupled from the chat history storage. If the chat history is 200k words, but the model’s limit is 128k tokens, the oldest 72k tokens are simply truncated. The model “forgets” the beginning of the chat. Some systems use a sliding window or compress/summarize older messages before dropping them, or use a scratchpad to note down important things in the context (claude code). </p>
 
 <p>This is where context caching comes in. You can process a large block of text like a 100 page PDF and cache the KV representation. This can be persisted in a disaggregated memory pool of CPU RAM, HBM, etc. The system generates a handle pointing to this state. When I send a question about this doc, the prompt will include the handle, and the serving engine can skip the entire prefill. It’ll simply locate the cached KV state, load it into the HBM, and begin generating tokens. That’s quite useful for quickly working with large documents. TPUs kind of have an advantage here because they were designed from scratch for distributed stateful workloads with unified memory addressing. </p>
+</div>
 
 <p class="back-link"><a href="../index.html">&larr; Back to main page</a></p>
 </div>

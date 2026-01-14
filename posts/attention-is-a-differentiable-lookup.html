@@ -12,6 +12,7 @@
 <div class="container">
 <h1>Attention is a differentiable lookup.</h1>
 <p class="post-date">Published on October 26, 2025<br>Last updated on October 28, 2025</p>
+<div class="post-body">
 <p>In classic lookup, we provide one exact key (K) and the table returns one exact value (V). It’s an all-or-nothing operation. Either the key exists and we get the corresponding value, or the key doesn’t exist, and we get an error. The Query (Q) is identical to the Key we’re searching for. The query we supply is the key we hope exists.</p>
 
 <p>Attention takes this rigid lookup and converts it into a differentiable and probabilistic operation. Instead of requiring an exact match, attention takes in a query, and compares it against all available keys simultaneously (using a dot product), smooths out the results, and returns a weighted average of their corresponding values. Instead of a one-to-one lookup, every value is contributing something to the output, depending on how well the keys match the query.
@@ -21,6 +22,8 @@ This makes attention inherently position-agnostic. It’s a probabilistic search
 </p> <p>
 The table in attention that’s being queried is dynamic and input-dependent. It gets rewritten as the model processes a sequence. With multi-head attention, there are several such lookups being done in parallel. At every layer, the table is rebuilt again and again from the current token representations. A lot of variants of attention are about how to make this lookup more efficient or sparse or structured, but fundamentally it is a lookup. 
 </p>
+</div>
+
 <p class="back-link"><a href="../index.html">&larr; Back to main page</a></p>
 </div>
 </div>

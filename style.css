@@ -30,7 +30,7 @@ body {
 }
 
 .post-page .container {
-  max-width: 820px;
+  max-width: 1420px;
   background-image: linear-gradient(#dce6f5 1px, transparent 1px);
   background-size: 100% 34px;
   background-position: 0 0.9rem;
@@ -75,7 +75,7 @@ h1 {
 }
 
 .about-page .container {
-  max-width: 1480px;
+  max-width: 1640px;
 }
 
 .about-page h1 {
@@ -84,14 +84,40 @@ h1 {
 
 .about-content {
   column-count: 2;
-  column-gap: 2.25rem;
-  column-width: 380px;
+  column-gap: 2.5rem;
+  column-width: 450px;
   column-rule: 1px solid #d6e2f0;
   padding: 0.5rem 0;
 }
 
 .about-content p {
   break-inside: avoid;
+}
+
+.post-body,
+.two-column-content {
+  column-count: 2;
+  column-gap: 2.5rem;
+  column-width: 430px;
+  column-rule: 1px solid #d6e2f0;
+}
+
+.post-body p,
+.two-column-content p {
+  break-inside: avoid;
+}
+
+.single-column-page .container {
+  max-width: 1100px;
+}
+
+.single-column-page .post-body {
+  column-count: 1;
+  column-rule: none;
+}
+
+.narrow-two-column-page .container {
+  max-width: 1200px;
 }
 
 h2 {
@@ -389,5 +415,11 @@ p + p {
     column-count: 1;
     column-rule: none;
     background-image: none;
+  }
+
+  .two-column-content,
+  .post-body {
+    column-count: 1;
+    column-rule: none;
   }
 }

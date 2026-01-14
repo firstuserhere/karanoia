@@ -7,11 +7,13 @@
 <title>A short note on DeepSeek v3.2</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="post-page">
+<body class="post-page two-column-page">
 <div class="wrapper">
 <div class="container">
 <h1>A short note on DeepSeek v3.2</h1>
 <p class="post-date">Published on December 10, 2025<br>Last updated on December 10, 2025</p>
+<div class="post-body">
+<div class="two-column-content">
 
 <p><a href="https://arxiv.org/abs/2512.02556">DeepSeek v3.2</a> was released a few days ago. I thought I’d write down some of my thoughts as I read the report.</p>
 
@@ -29,6 +31,9 @@ To prevent it from hallucinating issues and to make it more robust, they trained
 <p>For v3.2 they also changed the rewards in the RL setup. They removed the format reward, added in a length penalty for agentic tasks, used a reward model instead of a correctness reward for general tasks, and kept the language consistency reward. For math problems, they used the data and the generator-verifier-meta-verifier setup from DeepSeek Math v2.</p>
 
 <p>They significantly relaxed the KL penalty because the model needs to drift away from the base landscape to explore creative solutions to hard problems, and they stabilized this by making a bunch of improvements to GRPO.</p>
+
+</div>
+</div>
 
 <p class="back-link"><a href="../index.html">&larr; Back to main page</a></p>
 </div>
